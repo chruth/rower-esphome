@@ -21,7 +21,7 @@ external_components:
       type: git
       url: https://github.com/chruth/rower-esphome.git
       ref: main
-    components: [joroto_rower]
+    components: [rowing_monitor]
 
 
 joroto_rower:
