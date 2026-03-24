@@ -1,0 +1,71 @@
+esphome:
+  name: rower-esp32
+  friendly_name: Rower ESP32
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+api:
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/chruth/rower-esphome.git
+      ref: main
+    components: [rowing_monitor]
+
+rowing_monitor:
+  id: rower
+  pin_step1: GPIO16
+  pin_step2: GPIO17
+
+  top_enter_threshold: -3
+  top_leave_threshold: -5
+  bottom_threshold: -10
+  short_threshold: -8
+  micro_threshold: -4
+
+  min_stroke_ms: 700
+  session_timeout_ms: 20000
+  active_idle_ms: 1500
+
+  meters_per_travel: 0.4202
+
+sensor:
+  - platform: rowing_monitor
+    strokes:
+      name: "Valid Strokes"
+    short_strokes:
+      name: "Short Strokes"
+    micro_strokes:
+      name: "Micro Strokes"
+    spm:
+      name: "SPM"
+    distance:
+      name: "Distance"
+    short_distance:
+      name: "Short Distance"
+    micro_distance:
+      name: "Micro Distance"
+    active_time:
+      name: "Active Time"
+    avg_valid_travel:
+      name: "Avg Valid Travel"
+    avg_short_travel:
+      name: "Avg Short Travel"
+    avg_micro_travel:
+      name: "Avg Micro Travel"
+
+text_sensor:
+  - platform: rowing_monitor
+    phase:
+      name: "Rowing Phase"
