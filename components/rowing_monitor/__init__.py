@@ -1,9 +1,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import CONF_ID, CONF_PIN
+from esphome.const import CONF_ID
+from esphome.pins import internal_gpio_input_pin_schema
 
-AUTO_LOAD = ["sensor"]
-MULTI_CONF = False
+CODEOWNERS = []
+AUTO_LOAD = []
+MULTI_CONF = True
 
 rowing_monitor_ns = cg.esphome_ns.namespace("rowing_monitor")
 RowingMonitor = rowing_monitor_ns.class_("RowingMonitor", cg.Component)
@@ -20,13 +22,11 @@ CONF_SESSION_TIMEOUT_MS = "session_timeout_ms"
 CONF_ACTIVE_IDLE_MS = "active_idle_ms"
 CONF_METERS_PER_TRAVEL = "meters_per_travel"
 
-CONF_ROWING_MONITOR_ID = "rowing_monitor_id"
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(RowingMonitor),
-        cv.Required(CONF_PIN_STEP1): cv.int_,
-        cv.Required(CONF_PIN_STEP2): cv.int_,
+        cv.Required(CONF_PIN_STEP1): internal_gpio_input_pin_schema,
+        cv.Required(CONF_PIN_STEP2): internal_gpio_input_pin_schema,
         cv.Optional(CONF_TOP_ENTER_THRESHOLD, default=-3): cv.int_,
         cv.Optional(CONF_TOP_LEAVE_THRESHOLD, default=-5): cv.int_,
         cv.Optional(CONF_BOTTOM_THRESHOLD, default=-10): cv.int_,
@@ -35,16 +35,21 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MIN_STROKE_MS, default=700): cv.positive_int,
         cv.Optional(CONF_SESSION_TIMEOUT_MS, default=20000): cv.positive_int,
         cv.Optional(CONF_ACTIVE_IDLE_MS, default=1500): cv.positive_int,
-        cv.Optional(CONF_METERS_PER_TRAVEL, default=0.4202): cv.float_,
+        cv.Optional(CONF_METERS_PER_TRAVEL, default=0.6667): cv.float_,
     }
 ).extend(cv.COMPONENT_SCHEMA)
+
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    cg.add(var.set_pin_step1(config[CONF_PIN_STEP1]))
-    cg.add(var.set_pin_step2(config[CONF_PIN_STEP2]))
+    pin1 = await cg.gpio_pin_expression(config[CONF_PIN_STEP1])
+    cg.add(var.set_pin_step1(pin1))
+
+    pin2 = await cg.gpio_pin_expression(config[CONF_PIN_STEP2])
+    cg.add(var.set_pin_step2(pin2))
+
     cg.add(var.set_top_enter_threshold(config[CONF_TOP_ENTER_THRESHOLD]))
     cg.add(var.set_top_leave_threshold(config[CONF_TOP_LEAVE_THRESHOLD]))
     cg.add(var.set_bottom_threshold(config[CONF_BOTTOM_THRESHOLD]))
