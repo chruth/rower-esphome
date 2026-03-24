@@ -18,8 +18,11 @@ wifi:
 
 external_components:
   - source:
-      type: local
-      path: my_components
+      type: git
+      url: https://github.com/chruth/rower-esphome.git
+      ref: main
+    components: [joroto_rower]
+
 
 joroto_rower:
   id: rower
