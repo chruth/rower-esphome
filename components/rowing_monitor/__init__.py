@@ -1,5 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome.const import CONF_ID, CONF_PIN
 
 AUTO_LOAD = ["sensor"]
 MULTI_CONF = False
@@ -18,6 +19,7 @@ CONF_MIN_STROKE_MS = "min_stroke_ms"
 CONF_SESSION_TIMEOUT_MS = "session_timeout_ms"
 CONF_ACTIVE_IDLE_MS = "active_idle_ms"
 CONF_METERS_PER_TRAVEL = "meters_per_travel"
+
 CONF_ROWING_MONITOR_ID = "rowing_monitor_id"
 
 CONFIG_SCHEMA = cv.Schema(
@@ -38,7 +40,7 @@ CONFIG_SCHEMA = cv.Schema(
 ).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config["id"])
+    var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
     cg.add(var.set_pin_step1(config[CONF_PIN_STEP1]))
