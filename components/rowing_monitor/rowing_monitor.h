@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 
 #include "esphome/core/component.h"
@@ -81,6 +82,7 @@ class RowingMonitor : public Component {
   void publish_phase_();
   void publish_state_();
   void log_periodic_debug_(uint32_t now_ms) const;
+  bool publish_if_changed_(sensor::Sensor *sensor, float value, float &last_value);
 
   InternalGPIOPin *pin_step1_{nullptr};
   InternalGPIOPin *pin_step2_{nullptr};
@@ -153,6 +155,19 @@ class RowingMonitor : public Component {
   sensor::Sensor *avg_short_travel_sensor_{nullptr};
   sensor::Sensor *avg_micro_travel_sensor_{nullptr};
   text_sensor::TextSensor *phase_text_sensor_{nullptr};
+
+  // Cache last published values to avoid flooding logs with unchanged states.
+  float last_pub_valid_strokes_{NAN};
+  float last_pub_short_strokes_{NAN};
+  float last_pub_micro_strokes_{NAN};
+  float last_pub_spm_{NAN};
+  float last_pub_active_time_{NAN};
+  float last_pub_distance_{NAN};
+  float last_pub_short_distance_{NAN};
+  float last_pub_micro_distance_{NAN};
+  float last_pub_avg_valid_travel_{NAN};
+  float last_pub_avg_short_travel_{NAN};
+  float last_pub_avg_micro_travel_{NAN};
 };
 
 }  // namespace rowing_monitor
