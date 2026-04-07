@@ -25,24 +25,22 @@ external_components:
 
 rowing_monitor:
   id: rower
-  pin_step1: GPIO16
-  pin_step2: GPIO17
-
+  pin_step1: 16
+  pin_step2: 17
   top_enter_threshold: -3
   top_leave_threshold: -5
   bottom_threshold: -10
   short_threshold: -8
   micro_threshold: -4
-
   min_stroke_ms: 700
   session_timeout_ms: 20000
   active_idle_ms: 1500
-
-  meters_per_travel: 0.4202
+  meters_per_travel: 0.6667
 
 sensor:
   - platform: rowing_monitor
-    strokes:
+    rowing_monitor_id: rower
+    valid_strokes:
       name: "Valid Strokes"
     short_strokes:
       name: "Short Strokes"
@@ -50,14 +48,14 @@ sensor:
       name: "Micro Strokes"
     spm:
       name: "SPM"
+    active_time:
+      name: "Active Time"
     distance:
       name: "Distance"
     short_distance:
       name: "Short Distance"
     micro_distance:
       name: "Micro Distance"
-    active_time:
-      name: "Active Time"
     avg_valid_travel:
       name: "Avg Valid Travel"
     avg_short_travel:
@@ -67,5 +65,6 @@ sensor:
 
 text_sensor:
   - platform: rowing_monitor
+    rowing_monitor_id: rower
     phase:
       name: "Rowing Phase"
