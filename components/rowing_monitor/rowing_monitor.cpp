@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "driver/gpio.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 
@@ -46,8 +47,10 @@ void RowingMonitor::setup() {
 
   this->prev_state_ = this->read_state_fast_() & 0x3;
 
-  this->pin_step1_->attach_interrupt(&RowingMonitor::gpio_isr, this, gpio::INTERRUPT_ANY_EDGE);
-  this->pin_step2_->attach_interrupt(&RowingMonitor::gpio_isr, this, gpio::INTERRUPT_ANY_EDGE);
+  gpio_set_intr_type((gpio_num_t) this->pin_step1_->get_pin(), GPIO_INTR_ANYEDGE);
+  gpio_set_intr_type((gpio_num_t) this->pin_step2_->get_pin(), GPIO_INTR_ANYEDGE);
+  gpio_isr_handler_add((gpio_num_t) this->pin_step1_->get_pin(), &RowingMonitor::gpio_isr, this);
+  gpio_isr_handler_add((gpio_num_t) this->pin_step2_->get_pin(), &RowingMonitor::gpio_isr, this);
 
   ESP_LOGI(TAG,
            "Configured thresholds: top_enter=%ld top_leave=%ld micro=%ld short=%ld bottom=%ld",
