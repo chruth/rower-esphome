@@ -17,8 +17,9 @@ void IRAM_ATTR RowingMonitor::gpio_isr(void *arg) {
 }
 
 uint8_t RowingMonitor::read_state_fast_() const {
-  const uint8_t a = this->pin_step1_->digital_read() ? 1 : 0;
-  const uint8_t b = this->pin_step2_->digital_read() ? 1 : 0;
+  // Use direct GPIO reads so ISR path stays lightweight and deterministic.
+  const uint8_t a = gpio_get_level((gpio_num_t) this->pin_step1_->get_pin()) ? 1 : 0;
+  const uint8_t b = gpio_get_level((gpio_num_t) this->pin_step2_->get_pin()) ? 1 : 0;
   return (a << 1) | b;
 }
 
@@ -47,10 +48,25 @@ void RowingMonitor::setup() {
 
   this->prev_state_ = this->read_state_fast_() & 0x3;
 
+  // Ensure the global ISR service is available before handler registration.
+  const esp_err_t isr_service = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
+  if (isr_service != ESP_OK && isr_service != ESP_ERR_INVALID_STATE) {
+    ESP_LOGE(TAG, "Failed to install GPIO ISR service: %d", (int) isr_service);
+    this->mark_failed();
+    return;
+  }
+
   gpio_set_intr_type((gpio_num_t) this->pin_step1_->get_pin(), GPIO_INTR_ANYEDGE);
   gpio_set_intr_type((gpio_num_t) this->pin_step2_->get_pin(), GPIO_INTR_ANYEDGE);
-  gpio_isr_handler_add((gpio_num_t) this->pin_step1_->get_pin(), &RowingMonitor::gpio_isr, this);
-  gpio_isr_handler_add((gpio_num_t) this->pin_step2_->get_pin(), &RowingMonitor::gpio_isr, this);
+  const esp_err_t isr_step1 =
+      gpio_isr_handler_add((gpio_num_t) this->pin_step1_->get_pin(), &RowingMonitor::gpio_isr, this);
+  const esp_err_t isr_step2 =
+      gpio_isr_handler_add((gpio_num_t) this->pin_step2_->get_pin(), &RowingMonitor::gpio_isr, this);
+  if (isr_step1 != ESP_OK || isr_step2 != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to attach GPIO ISRs: step1=%d step2=%d", (int) isr_step1, (int) isr_step2);
+    this->mark_failed();
+    return;
+  }
 
   ESP_LOGI(TAG,
            "Configured thresholds: top_enter=%ld top_leave=%ld micro=%ld short=%ld bottom=%ld",
@@ -94,7 +110,7 @@ void RowingMonitor::loop() {
     this->publish_state_();
   }
 
-  if (now - this->last_debug_ms_ >= 2000U) {
+  if (now - this->last_debug_ms_ >= 5000U && (this->session_active_ || changed)) {
     this->last_debug_ms_ = now;
     this->log_periodic_debug_(now);
   }
