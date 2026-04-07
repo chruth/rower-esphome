@@ -1,6 +1,7 @@
 #include "rowing_monitor.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "driver/gpio.h"
 #include "esphome/core/hal.h"
@@ -341,39 +342,36 @@ float RowingMonitor::compute_spm_() const {
 }
 
 void RowingMonitor::publish_state_() {
-  if (this->valid_strokes_sensor_ != nullptr)
-    this->valid_strokes_sensor_->publish_state((float) this->valid_strokes_);
-  if (this->short_strokes_sensor_ != nullptr)
-    this->short_strokes_sensor_->publish_state((float) this->short_strokes_);
-  if (this->micro_strokes_sensor_ != nullptr)
-    this->micro_strokes_sensor_->publish_state((float) this->micro_strokes_);
+  this->publish_if_changed_(this->valid_strokes_sensor_, (float) this->valid_strokes_, this->last_pub_valid_strokes_);
+  this->publish_if_changed_(this->short_strokes_sensor_, (float) this->short_strokes_, this->last_pub_short_strokes_);
+  this->publish_if_changed_(this->micro_strokes_sensor_, (float) this->micro_strokes_, this->last_pub_micro_strokes_);
 
-  if (this->spm_sensor_ != nullptr)
-    this->spm_sensor_->publish_state(this->compute_spm_());
+  this->publish_if_changed_(this->spm_sensor_, this->compute_spm_(), this->last_pub_spm_);
 
-  if (this->active_time_sensor_ != nullptr)
-    this->active_time_sensor_->publish_state(this->active_time_ms_ / 1000.0f);
+  this->publish_if_changed_(this->active_time_sensor_, this->active_time_ms_ / 1000.0f, this->last_pub_active_time_);
 
   const float distance_m = this->valid_distance_m_ + this->short_distance_m_;  // per requested behavior
-  if (this->distance_sensor_ != nullptr)
-    this->distance_sensor_->publish_state(distance_m);
-  if (this->short_distance_sensor_ != nullptr)
-    this->short_distance_sensor_->publish_state(this->short_distance_m_);
-  if (this->micro_distance_sensor_ != nullptr)
-    this->micro_distance_sensor_->publish_state(this->micro_distance_m_);
+  this->publish_if_changed_(this->distance_sensor_, distance_m, this->last_pub_distance_);
+  this->publish_if_changed_(this->short_distance_sensor_, this->short_distance_m_, this->last_pub_short_distance_);
+  this->publish_if_changed_(this->micro_distance_sensor_, this->micro_distance_m_, this->last_pub_micro_distance_);
 
-  if (this->avg_valid_travel_sensor_ != nullptr) {
-    const float avg = this->valid_strokes_ > 0 ? (float) this->valid_travel_sum_ / (float) this->valid_strokes_ : 0.0f;
-    this->avg_valid_travel_sensor_->publish_state(avg);
-  }
-  if (this->avg_short_travel_sensor_ != nullptr) {
-    const float avg = this->short_strokes_ > 0 ? (float) this->short_travel_sum_ / (float) this->short_strokes_ : 0.0f;
-    this->avg_short_travel_sensor_->publish_state(avg);
-  }
-  if (this->avg_micro_travel_sensor_ != nullptr) {
-    const float avg = this->micro_strokes_ > 0 ? (float) this->micro_travel_sum_ / (float) this->micro_strokes_ : 0.0f;
-    this->avg_micro_travel_sensor_->publish_state(avg);
-  }
+  const float avg_valid = this->valid_strokes_ > 0 ? (float) this->valid_travel_sum_ / (float) this->valid_strokes_ : 0.0f;
+  const float avg_short = this->short_strokes_ > 0 ? (float) this->short_travel_sum_ / (float) this->short_strokes_ : 0.0f;
+  const float avg_micro = this->micro_strokes_ > 0 ? (float) this->micro_travel_sum_ / (float) this->micro_strokes_ : 0.0f;
+  this->publish_if_changed_(this->avg_valid_travel_sensor_, avg_valid, this->last_pub_avg_valid_travel_);
+  this->publish_if_changed_(this->avg_short_travel_sensor_, avg_short, this->last_pub_avg_short_travel_);
+  this->publish_if_changed_(this->avg_micro_travel_sensor_, avg_micro, this->last_pub_avg_micro_travel_);
+}
+
+bool RowingMonitor::publish_if_changed_(sensor::Sensor *sensor, float value, float &last_value) {
+  if (sensor == nullptr)
+    return false;
+  if (!std::isnan(last_value) && std::fabs(last_value - value) < 0.0001f)
+    return false;
+
+  last_value = value;
+  sensor->publish_state(value);
+  return true;
 }
 
 void RowingMonitor::log_periodic_debug_(uint32_t now_ms) const {
