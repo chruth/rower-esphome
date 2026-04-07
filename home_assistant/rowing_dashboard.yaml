@@ -1,0 +1,36 @@
+type: vertical-stack
+cards:
+  - type: entities
+    title: Rower Live
+    show_header_toggle: false
+    entities:
+      - entity: sensor.rower_phase
+        name: Phase
+      - entity: sensor.rower_spm
+        name: SPM
+      - entity: sensor.rower_active_time
+        name: Active Time
+      - entity: sensor.rower_session_distance
+        name: Session Distance
+      - entity: binary_sensor.rower_session_active
+        name: Session Active
+
+  - type: entities
+    title: Stroke Counts
+    show_header_toggle: false
+    entities:
+      - entity: sensor.rower_valid_strokes
+      - entity: sensor.rower_short_strokes
+      - entity: sensor.rower_micro_strokes
+      - entity: sensor.rower_total_strokes
+
+  - type: entities
+    title: Distance And Travel
+    show_header_toggle: false
+    entities:
+      - entity: sensor.rower_distance
+      - entity: sensor.rower_short_distance
+      - entity: sensor.rower_micro_distance
+      - entity: sensor.rower_avg_valid_travel
+      - entity: sensor.rower_avg_short_travel
+      - entity: sensor.rower_avg_micro_travel

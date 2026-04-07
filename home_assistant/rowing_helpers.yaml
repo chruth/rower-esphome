@@ -1,0 +1,31 @@
+template:
+  - binary_sensor:
+      - name: "Rower Session Active"
+        unique_id: rower_session_active
+        icon: mdi:rowing
+        state: >
+          {{ states('sensor.rower_phase') != 'AT_TOP' or (states('sensor.rower_spm')|float(0) > 0) }}
+
+  - sensor:
+      - name: "Rower Total Strokes"
+        unique_id: rower_total_strokes
+        unit_of_measurement: "strokes"
+        icon: mdi:counter
+        state: >
+          {{
+            (states('sensor.rower_valid_strokes')|float(0)
+            + states('sensor.rower_short_strokes')|float(0)
+            + states('sensor.rower_micro_strokes')|float(0)) | round(0)
+          }}
+
+      - name: "Rower Session Distance"
+        unique_id: rower_session_distance
+        unit_of_measurement: "m"
+        device_class: distance
+        state_class: measurement
+        icon: mdi:ruler
+        state: >
+          {{
+            (states('sensor.rower_distance')|float(0)
+            + states('sensor.rower_micro_distance')|float(0)) | round(2)
+          }}
