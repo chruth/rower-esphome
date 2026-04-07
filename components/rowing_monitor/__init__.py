@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import pins
-from esphome.const import CONF_SENSOR, CONF_TEXT_SENSOR
+from esphome.const import CONF_SENSOR
 
 from . import sensor as rowing_sensor
 from . import text_sensor as rowing_text_sensor
@@ -25,6 +25,7 @@ CONF_MIN_STROKE_MS = "min_stroke_ms"
 CONF_SESSION_TIMEOUT_MS = "session_timeout_ms"
 CONF_ACTIVE_IDLE_MS = "active_idle_ms"
 CONF_METERS_PER_TRAVEL = "meters_per_travel"
+CONF_TEXT_SENSOR = "text_sensor"
 
 CONFIG_SCHEMA = (
     cv.Schema(

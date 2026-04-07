@@ -13,7 +13,10 @@ TEXT_SENSOR_SCHEMA = cv.Schema(
 
 
 async def register_text_sensors(var, config):
-    config = config.get(CONF_TEXT_SENSOR, {})
-    if CONF_PHASE in config:
+    nested = config.get(CONF_TEXT_SENSOR, {})
+    if CONF_PHASE in nested:
+        sens = await text_sensor.new_text_sensor(nested[CONF_PHASE])
+        cg.add(var.set_phase_text_sensor(sens))
+    elif CONF_PHASE in config:
         sens = await text_sensor.new_text_sensor(config[CONF_PHASE])
         cg.add(var.set_phase_text_sensor(sens))
