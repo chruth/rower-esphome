@@ -1,12 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import pins
+from esphome.const import CONF_SENSOR, CONF_TEXT_SENSOR
 
 from . import sensor as rowing_sensor
 from . import text_sensor as rowing_text_sensor
 
 AUTO_LOAD = ["sensor", "text_sensor"]
-DEPENDENCIES = ["gpio"]
 MULTI_CONF = True
 
 rowing_monitor_ns = cg.esphome_ns.namespace("rowing_monitor")
@@ -41,11 +41,14 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_SESSION_TIMEOUT_MS, default=20000): cv.positive_int,
             cv.Optional(CONF_ACTIVE_IDLE_MS, default=1500): cv.positive_int,
             cv.Optional(CONF_METERS_PER_TRAVEL, default=0.6667): cv.float_,
-            cv.Optional(rowing_sensor.CONF_SENSOR): rowing_sensor.SENSOR_SCHEMA,
-            cv.Optional(rowing_text_sensor.CONF_TEXT_SENSOR): rowing_text_sensor.TEXT_SENSOR_SCHEMA,
+            cv.Optional(CONF_SENSOR): rowing_sensor.SENSOR_SCHEMA,
+            cv.Optional(CONF_TEXT_SENSOR): rowing_text_sensor.TEXT_SENSOR_SCHEMA,
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
+    # Backward-compatible: also allow flat sensor keys directly under rowing_monitor
+    .extend(rowing_sensor.SENSOR_SCHEMA)
+    .extend(rowing_text_sensor.TEXT_SENSOR_SCHEMA)
 )
 
 
