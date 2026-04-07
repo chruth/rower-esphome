@@ -31,8 +31,8 @@ CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(RowingMonitor),
-            cv.Required(CONF_PIN_STEP1): pins.gpio_input_pin_schema,
-            cv.Required(CONF_PIN_STEP2): pins.gpio_input_pin_schema,
+            cv.Required(CONF_PIN_STEP1): pins.internal_gpio_input_pin_schema,
+            cv.Required(CONF_PIN_STEP2): pins.internal_gpio_input_pin_schema,
             cv.Optional(CONF_TOP_ENTER_THRESHOLD, default=-3): cv.int_,
             cv.Optional(CONF_TOP_LEAVE_THRESHOLD, default=-5): cv.int_,
             cv.Optional(CONF_BOTTOM_THRESHOLD, default=-10): cv.int_,

@@ -16,8 +16,8 @@ class RowingMonitor : public Component {
   void loop() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
 
-  void set_pin_step1(GPIOPin *pin) { pin_step1_ = pin; }
-  void set_pin_step2(GPIOPin *pin) { pin_step2_ = pin; }
+  void set_pin_step1(InternalGPIOPin *pin) { pin_step1_ = pin; }
+  void set_pin_step2(InternalGPIOPin *pin) { pin_step2_ = pin; }
 
   void set_top_enter_threshold(int32_t v) { top_enter_threshold_ = v; }
   void set_top_leave_threshold(int32_t v) { top_leave_threshold_ = v; }
@@ -82,8 +82,8 @@ class RowingMonitor : public Component {
   void publish_state_();
   void log_periodic_debug_(uint32_t now_ms) const;
 
-  GPIOPin *pin_step1_{nullptr};
-  GPIOPin *pin_step2_{nullptr};
+  InternalGPIOPin *pin_step1_{nullptr};
+  InternalGPIOPin *pin_step2_{nullptr};
 
   volatile int32_t encoder_pos_{0};
   volatile uint8_t prev_state_{0};

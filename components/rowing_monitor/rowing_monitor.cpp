@@ -21,7 +21,7 @@ uint8_t RowingMonitor::read_state_fast_() const {
   return (a << 1) | b;
 }
 
-void IRAM_ATTR RowingMonitor::handle_isr_() {
+void RowingMonitor::handle_isr_() {
   const uint8_t state = this->read_state_fast_() & 0x3;
   const uint8_t idx = (this->prev_state_ << 2) | state;
   const int8_t delta = QUAD_TABLE_[idx];
